@@ -8,20 +8,20 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["GET"],
     allow_headers=["*"],
 )
 
-# Load data from JSON
-with open("q-vercel-python.json", "r") as file:
-    data = json.load(file)
-students_marks = {student["name"]: student["marks"] for student in data["students"]}
+# Load marks data
+with open("q-vercel-python.json", "r") as file:  
+    marks_list = json.load(file)
+    # print(marks_list)
+
+# Convert list to a dictionary for fast lookup
+marks_data = {entry["name"]: entry["marks"] for entry in marks_list}
 
 @app.get("/api")
-async def get_marks(names: list[str] = Query([])):
-    marks = [students_marks.get(name, 0) for name in names]
-    return {"marks": marks}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+def get_marks(name: list[str] = Query([])):
+    result = [marks_data.get(n, None) for n in name]
+    return {"marks": result}
